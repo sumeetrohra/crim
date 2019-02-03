@@ -1,8 +1,25 @@
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import firebase from 'firebase';
+import {
+    Spinner,
+    Container,
+    Header,
+    DatePicker,
+    Content,
+    Text,
+    Body,
+    Title,
+    Form,
+    Item,
+    Label,
+    Input,
+    Textarea,
+    Button
+} from 'native-base';
+
 import {
     enrollUrl,
     headers
@@ -16,11 +33,21 @@ class EnrollPage extends Component {
 
     state = {
         url: null,
-        result: null
+        result: null,
+        name: '',
+        date: '',
+        crimeDetails: '',
+        loading: false,
+        disabled: false
+    }
+
+    componentWillUnmount() {
+        this.setState({ result: null });
     }
 
     //first thing to do is to search if there are any similiar faces
-    async componentWillMount() {
+    onSavePress = async () => {
+        this.setState({ loading: true });
         const uri = this.props.uri;
 
         //this code gives me blob object, DO NOT TOUCH THIS CODE
@@ -46,6 +73,7 @@ class EnrollPage extends Component {
             .then(() => {
                 firebase.storage().ref('temp/temp.jpg').getDownloadURL()
                     .then(res => {
+                        this.setState({ result: res });
                         axios.post(`${enrollUrl}`, {
                             'url': res
                         }, {
@@ -53,8 +81,9 @@ class EnrollPage extends Component {
                             }
                         )
                             .then(result => {
-                                firebase.database().ref('/faces').child(result.data.persistedFaceId).set({ 'name': 'sumeet', 'data': 'temp data' })
-                                    .then(res1 => this.setState({ result: res1 }))
+                                this.setState({ result });
+                                firebase.database().ref('/faces').child(result.data.persistedFaceId).set({ 'name': this.state.name, 'date of birth': this.state.date, 'crime': this.state.crimeDetails })
+                                    .then(() => this.setState({ loading: false, disabled: true, result: 'done' }))
                                     .catch(err => this.setState({ result: err }));
                             })
                             .catch(err => console.log(err));
@@ -63,22 +92,64 @@ class EnrollPage extends Component {
             });
     }
 
-    componentWillUnmount() {
-        this.setState({ result: null });
-    }
-
-    render() {
-        if (this.state.result) {
+    renderButton() {
+        if (this.state.loading) {
             return (
-                <View>
-                    <Text>{JSON.stringify(this.state)}</Text>
-                </View>
+                <Spinner />
             );
         }
         return (
-            <View>
-                <Text>Enroll page</Text>
-            </View>
+            <Button block bordered disabled={this.state.disabled} onPress={() => this.onSavePress()}>
+                <Text>Save Details</Text>
+            </Button>
+        );
+    }
+
+    render() {
+        return (
+            <Container>
+                <Header>
+                    <Body>
+                        <Title>New Entry</Title>
+                    </Body>
+                </Header>
+                <Content padder>
+                    <Form>
+                        <Item>
+                            <Label>Name</Label>
+                            <Input onChangeText={name => this.setState({ name })} value={this.state.name} />
+                        </Item>
+                        <Item>
+                            <Label>Date Of Birth</Label>
+                            <DatePicker
+                                defaultDate={this.state.date}
+                                minimumDate={new Date(1930, 1, 1)}
+                                maximumDate={new Date(2020, 1, 1)}
+                                locale={'en'}
+                                timeZoneOffsetInMinutes={undefined}
+                                modalTransparent={false}
+                                animationType={'fade'}
+                                androidMode={'default'}
+                                placeHolderText="Select date"
+                                textStyle={{ color: 'green' }}
+                                placeHolderTextStyle={{ color: '#d3d3d3' }}
+                                onDateChange={date => {
+                                    this.setState({ date: date.toString().substr(4, 12) });
+                                    console.log(this.state.date.toString());
+                                }}
+                                disabled={false}
+                                value={this.state.date}
+                            />
+                        </Item>
+                        <Item>
+                            <Label>Enter Crime Details</Label>
+                            <Textarea placeholder="" onChangeText={crimeDetails => this.setState({ crimeDetails })} value={this.state.crimeDetails} />
+                        </Item>
+                    </Form>
+                    {this.renderButton()}
+                    <Text>{JSON.stringify(this.state.result)}</Text>
+                </Content>
+            </Container>
         );
     }
 }

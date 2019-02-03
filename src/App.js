@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import ReduxThunk from 'redux-thunk';
 
-import firebaseDetails from './apiDetails/ApiDetails';
+import { firebaseDetails } from './apiDetails/ApiDetails';
 import reducers from './reducers';
 import Login from './screens/Login';
 import Home from './screens/Home';

@@ -11,9 +11,10 @@ import {
     Body,
     Title,
     Button,
-    Text
+    Text,
+    Spinner
 } from 'native-base';
-import { Font, AppLoading } from 'expo';
+import { Font } from 'expo';
 import { connect } from 'react-redux';
 
 import {
@@ -60,7 +61,7 @@ class Login extends Component {
 
     renderButton() {
         if (this.props.loading) {
-            return <AppLoading />;
+            return <Spinner />;
         }
         return (
             <Button
@@ -83,7 +84,7 @@ class Login extends Component {
 
     render() {
         if (this.state.loading) {
-            return <AppLoading />;
+            return <Spinner />;
         }
 
         return (
