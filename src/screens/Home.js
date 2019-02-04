@@ -62,7 +62,8 @@ class Home extends Component {
                     <Button block bordered style={styles.buttonStyle} onPress={() => this.onButtonPress('search')}>
                         <Text>Search</Text>
                     </Button>
-                    <Text>{JSON.stringify(this.state)}</Text>
+                    {/*to check the response*/}
+                    {/* <Text>{JSON.stringify(this.state)}</Text> */}
                 </Content>
             </Container>
         );

@@ -38,15 +38,12 @@ class EnrollPage extends Component {
         date: '',
         crimeDetails: '',
         loading: false,
-        disabled: false
-    }
-
-    componentWillUnmount() {
-        this.setState({ result: null });
+        disabled: false,
+        persistedFaceId: null
     }
 
     //first thing to do is to search if there are any similiar faces
-    onSavePress = async () => {
+    componentWillMount = async () => {
         this.setState({ loading: true });
         const uri = this.props.uri;
 
@@ -81,21 +78,41 @@ class EnrollPage extends Component {
                             }
                         )
                             .then(result => {
-                                this.setState({ result });
-                                firebase.database().ref('/faces').child(result.data.persistedFaceId).set({ 'name': this.state.name, 'date of birth': this.state.date, 'crime': this.state.crimeDetails })
-                                    .then(() => this.setState({ loading: false, disabled: true, result: 'done' }))
-                                    .catch(err => this.setState({ result: err }));
+                                this.setState({ result, persistedFaceId: result.data.persistedFaceId, loading: false });
                             })
-                            .catch(err => console.log(err));
+                            .catch(err => this.setState({ result: err, loading: false }));
                     })
-                    .catch(err => console.log(err));
+                    .catch(err => this.setState({ result: err, loading: false }));
             });
     }
+
+    componentWillUnmount() {
+        this.setState({ result: null });
+    }
+
+    onSavePress = () => {
+        this.setState({ loading: true });
+        firebase.database().ref('/faces').child(this.state.persistedFaceId).set({ 'name': this.state.name, 'date of birth': this.state.date, 'crime': this.state.crimeDetails })
+            .then(() => this.setState({ loading: false, disabled: true, result: 'done' }))
+            .catch(err => this.setState({ result: err, loading: false }));
+    };
 
     renderButton() {
         if (this.state.loading) {
             return (
-                <Spinner />
+                <View>
+                    <Spinner />
+                </View>
+            );
+        }
+        else if (!this.state.persistedFaceId && !this.state.loading) {
+            return (
+                <Container>
+                    <Content>
+                        <Text>Error: Cannot capture a face, Please try again</Text>
+                        <Text>{JSON.stringify(this.state)}</Text>
+                    </Content>
+                </Container>
             );
         }
         return (
@@ -147,7 +164,7 @@ class EnrollPage extends Component {
                         </Item>
                     </Form>
                     {this.renderButton()}
-                    <Text>{JSON.stringify(this.state.result)}</Text>
+                    {/* <Text>{JSON.stringify(this.state)}</Text> */}
                 </Content>
             </Container>
         );

@@ -23,7 +23,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.crim"
+    },
+    "android": {
+      "package": "com.example.crim"
     }
   }
 }

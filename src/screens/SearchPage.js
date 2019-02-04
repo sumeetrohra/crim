@@ -108,6 +108,13 @@ class SearchPage extends Component {
         if (this.state.loading) {
             return <Spinner />;
         }
+        else if (!this.state.persistedFaceId) {
+            return (
+                <View>
+                    <Text>Error: Either cannot capture a face or Couldn't find a similiar face\nGo back and try again</Text>
+                </View>
+            );
+        }
         return (
             <Container>
                 <Header>
@@ -150,7 +157,7 @@ class SearchPage extends Component {
                     <Button disabled={this.state.disabled} onPress={() => this.onEditPress()}>
                         <Text>Save Changes</Text>
                     </Button>
-                    <Text>{JSON.stringify(this.state)}</Text>
+                    {/* <Text>{JSON.stringify(this.state)}</Text> */}
                 </Content>
             </Container>
         );
